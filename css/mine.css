@@ -120,6 +120,7 @@ button{
 
 #menu span{
 	float:right;
+	line-height:20px;
 }
 #mouse_point{
 	display:none;
