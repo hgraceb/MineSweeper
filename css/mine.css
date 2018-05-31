@@ -21,7 +21,7 @@ button{
 	position: absolute;
 	width:467px;
 	height: 30px;
-	margin-top: 336px;
+	margin-top: 355px;
 	margin-left:0px;
 	margin-bottom: 20px;
 	background:rgb(192,192,192);
@@ -268,7 +268,7 @@ button{
 }
 #counters{
 	width:120px;
-	height:324px;
+	height:343px;
 	margin:0px auto;
 	/*手机端上下滑动的空间*/
 	/*暂定为无，避免手机端扫雷时屏幕滑动影响操作*/
