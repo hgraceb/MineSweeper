@@ -29,6 +29,7 @@ function fileImport() {
 		        var timestamp="Timestamp:";//时间戳
 		        var events=new Array();//鼠标事件
 		        video=new Array();
+		        path=0;
 		        var size=0;//鼠标事件长度
 		        var realtime="";
 		        var player="";//玩家标志
@@ -76,6 +77,12 @@ function fileImport() {
 			        	video[size].y=events[5]*256+events[7];
 			        	video[size].sec=events[6]*256+events[2]-1;
 			        	video[size].hun=events[4];
+			        	if(size>0){
+			        		video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+			        	}
+			        	else{
+			        		video[size].path=0;
+			        	}
 			        	if(video[size].sec<0)break;
 			        	for(var i=0;i<8;++i){
 			        		events[i]=this.result[number++].charCodeAt();
