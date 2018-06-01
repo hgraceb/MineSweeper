@@ -158,7 +158,7 @@ function restart_avf(){
 		video_play=true;
 		window.clearInterval(int);
 		int=setInterval(timer_avf,0);
-		log(plan);
+		console.log(plan);
 	}else{
 		container.replay_video();
 	}
@@ -229,7 +229,7 @@ function timer_avf(){
 	if((second*1000+millisecond*10)>video[0].realtime*1000){//高倍速时间有延迟，自欺欺人解决法
 		second=video[size-1].sec;
 		millisecond=video[size-1].hun;
-		log(second+'.'+millisecond);
+		console.log(second+'.'+millisecond);
 	}
 
 	while(plan<size&&(second*1000+millisecond*10)>=(video[plan].sec*1000+video[plan].hun*10)){
@@ -240,7 +240,7 @@ function timer_avf(){
 		
 		if(video[plan].mouse==1&&front!=current){//mv
 			if(current.isOpen==false&&rightClick==false&&leftClick==true){
-				if(current.getStyle()=="block"){
+				if(current.getStyle()=="block"&&left_invalid==false){
 					current.changeStyle("opening");
 				}
 			}else if(rightClick==true&&leftClick==true){
@@ -344,8 +344,8 @@ function timer_avf(){
 	// document.getElementById('Left').innerText=left_count+'@'+(left_count/(second+millisecond/100)).toFixed(2);
 	
 	if(second>video[size-1].sec+2){//简单的出错处理,可能出现错误判断导致录像中断的bug，2秒为容错值
-		log(second+'.'+speed+'.'+second/speed);
-		log("录像播放错误");
+		console.log(second+'.'+speed+'.'+second/speed);
+		console.log("录像播放错误");
 		stop();
 	}
 }
@@ -372,7 +372,7 @@ function stop()//暂停函数
 	{
 		stop_minutes+=60;
 	}
-	console.log((stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds())+(stop_milliseconds-begintime.getMilliseconds())/1000);
+	console.log(((stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds())+(stop_milliseconds-begintime.getMilliseconds())/1000).toFixed(2));
 	// second=(stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds());
 	// millisecond=parseInt((stop_milliseconds-begintime.getMilliseconds())/10);
 }
@@ -520,6 +520,7 @@ function write_counters(){//重写counter
 	document.getElementById('Right').innerText=right_count+'@'+(right_count/(second+millisecond/100)).toFixed(2);
 	document.getElementById('Double').innerText=double_count+'@'+(double_count/(second+millisecond/100)).toFixed(2);
 	document.getElementById('Cl').innerText=(left_count+right_count+double_count)+'@'+((left_count+right_count+double_count)/(second+millisecond/100)).toFixed(2);
+	document.getElementById('Path').innerText=path;
 }
 
 function Mouse_event(){//记录鼠标事件
@@ -530,6 +531,7 @@ function Mouse_event(){//记录鼠标事件
 	this.columns=null;
 	this.x=null;
 	this.y=null;
+	this.path=null;
 }
 
 function log(text){
