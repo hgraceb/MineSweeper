@@ -14,6 +14,7 @@ var left_invalid=false;//消除双击带左键
 var right_minus=true;//保证left_count只能减一次
 var video_invalid=true;//判断是否读取过录像文件并记录数据
 var reset_begin=false;//判断重开开始计时的时间
+var path=0;//移动距离
 
 function Container(d,e,f){
 	this.rows=d;//行
@@ -39,6 +40,7 @@ Container.prototype.init=function(level){
 	double_count=0;
 	ces_count=0;
 	right_minus=true;
+	path=0;
 	var exist=document.getElementById("container");
 	if(exist!=null){
 		if(document.getElementById("mouse_point")){
@@ -126,6 +128,7 @@ Container.prototype.add_mark=function(){
 		var input=document.createElement('input');//创建一个input元素
 		input.type='text';//为input元素添加类型
 		input.value=innerHTML;//为input元素添加值
+		input.id='mark_input';//修改标志时阻止触发快捷键，若修改需修改双处
 		input.ondblclick=function(){
 			event.stopPropagation();//阻止冒泡传递导致再次增加input
 		}
@@ -275,6 +278,7 @@ Container.prototype.reset_mine=function(){
 		ces_count=0;
 		right_minus=true;
 		reset_begin=true;
+		path=0;
 		console.log("重开布雷");
 		for(var i in this.childObject){
 			this.childObject[i].changeStyle("block");
@@ -343,7 +347,7 @@ Block.prototype.init=function(){
 			return false;
 		}
 		if(c.isOpen==false&&rightClick==false&&leftClick==true){
-			if(c.getStyle()=="block"){
+			if(c.getStyle()=="block"&&left_invalid==false){
 				c.changeStyle("opening");
 			}
 		}else if(rightClick==true&&leftClick==true){
@@ -583,7 +587,7 @@ Block.prototype.openaround=function()
 		for(var i=0;i<a.length;i++){
 			var b=this.neighbors[a[i]];
 			if(null!=b&&typeof(b)!="undefined"&&!b.isOpen&&b.getStyle()!="openedBlockBomb"&&b.getStyle()!="bomb"){
-				b.open();
+				b.around_open();
 				ces_count--;
 				flag=true;
 			}
@@ -592,10 +596,56 @@ Block.prototype.openaround=function()
 			ces_count++;
 		}
 	}
+	this.win();
+};
+
+Block.prototype.around_open=function()
+//跟open（）的区别在于没有进行是否胜利的判断
+//在openaround（）的操作时win（）应该在所有格子遍历完成后进行
+//否则ces_count可能在stop（）之后才完成计数，导致计数错误
+//没加标识变量判断那是因为只有此处特殊处理，没必要在别的地方多次初始化
+{
+	ces_count++;
+	if(this.bombNumAround==0){
+		this.changeStyle("opening");
+	}else if(this.bombNumAround>0){
+		this.changeStyle("number");
+		document.getElementById(this.id).getElementsByTagName("img")[0].src="image/"+this.bombNumAround+".bmp";
+	}else{
+		stop();
+		this.changeStyle("firstbomb");
+		document.getElementById(this.id).getElementsByTagName("img")[0].src="image/firstbomb.bmp";
+
+		//You Lose!
+		lose();
+		change_top_image("face","face_cry");
+	}
+	this.isOpen=true;
+	if(this.bombNumAround==0){
+		var a=new Array();
+		a.push("up");
+		a.push("right");
+		a.push("down");
+		a.push("left");
+		a.push("leftUp");
+		a.push("rightUp");
+		a.push("leftDown");
+		a.push("rightDown");
+		for(var i=0;i<a.length;i++){
+			var b=this.neighbors[a[i]];
+			if(null!=b&&typeof(b)!="undefined"&&!b.isBomb&&!b.isOpen&&b.getStyle()!="openedBlockBomb"){
+				b.open();
+				ces_count--;
+			}
+		}
+	}
 };
 
 function lose()
 {
+	if(gameover==true&&video!=0){
+		document.getElementById('Path').innerText=parseInt(video[size-1].path);
+	}
 	gameover=true;
 	var parent=document.getElementById("container");
 	for(var i=0;i<container.childObject.length;i++){
@@ -622,6 +672,9 @@ Block.prototype.win=function(){
 		// alert("You Win!");
 		stop();
 		change_top_image("face","face_sunglasses");
+		if(gameover==true&&video!=0){
+			path=parseInt(video[size-1].path);
+		}
 		gameover=true;
 		console.log("You Win!");
 		var parent=document.getElementById("container");
@@ -683,7 +736,8 @@ document.onmouseup=function() {
 }
 document.onkeydown=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
-  if(e){ 
+  if(e&&!document.getElementById('mark_input')){//修改标志时阻止触发快捷键，若修改需修改双处
+     e.preventDefault();//防止热键冲突，屏蔽快捷键原有功能
      if(e.keyCode==113){//F2 
      	container.init(0);
      }else if(e.keyCode==49){//1
