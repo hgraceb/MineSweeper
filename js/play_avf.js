@@ -113,15 +113,14 @@ function fileImport() {
 			        video[0].realtime=realtime;
 			        video[0].player=player;
 			        video[0].level=level;
-			        video[0].board=board;   
+			        video[0].board=board;
+			        if(window.orientation == 0 || window.orientation == 180){
+			        	if(level==3){//高级录像首次播放屏幕自适应
+							document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
+						}
+			        }
 			        start_avf(video);
 			        video_invalid=false;
-			        // container.play_avf(video,size,realtime,player);
-
-
-
-
-
 
 
 			        // var curx=cury=-1;
@@ -157,4 +156,15 @@ function fileImport() {
 	}else{
 		log("请选择一个录像文件");
 	}
+}
+
+var direction = "onorientationchange" in window ? "orientationchange" : "resize";
+// 代码中监测旋转是用了onorientationchange 函数
+// 但是在一些APP或游戏内嵌页面会有该函数不会执行
+// orientation获取不到的情况
+// 所以如果是内嵌页建议使用resize事件
+// 检查宽高变化来检测屏幕是否旋转
+window.addEventListener(direction,resize,false);
+function resize() {
+    document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
 }
