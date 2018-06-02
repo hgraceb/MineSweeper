@@ -46,6 +46,7 @@ Container.prototype.init=function(level){
 		if(document.getElementById("mouse_point")){
 			$("div#mouse_point").remove();
 		}
+		document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
 		document.getElementById("video_control").style.display="none";
 		var parent=document.getElementById("container");
 		var grandparent=document.getElementById("containers");
@@ -737,20 +738,26 @@ document.onmouseup=function() {
 document.onkeydown=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
   if(e&&!document.getElementById('mark_input')){//修改标志时阻止触发快捷键，若修改需修改双处
-     e.preventDefault();//防止热键冲突，屏蔽快捷键原有功能
      if(e.keyCode==113){//F2 
+     	e.preventDefault();//防止热键冲突，屏蔽快捷键原有功能
      	container.init(0);
      }else if(e.keyCode==49){//1
+     	e.preventDefault();
      	container.init(1);
      }else if(e.keyCode==50){//2
+     	e.preventDefault();
      	container.init(2);
      }else if(e.keyCode==51){//3
+     	e.preventDefault();
      	container.init(3);
      }else if(e.keyCode==114){//F3
+     	e.preventDefault();
      	container.reset_mine();
      }else if(e.keyCode==116){//F5
+     	e.preventDefault();
      	$("#files").click();
      }else if(e.keyCode==115){//F4
+     	e.preventDefault();
      	container.replay_video();
      }
   }    
