@@ -137,17 +137,58 @@ function fileImport() {
 		        video=new Array();
 
 		        if(this.result[0].charCodeAt()==0x11&&this.result[1].charCodeAt()==0x4D){
-		        	console.log("version: Clone 0.97");
+		        	console.log(this.result[27]);
 		        	if(this.result[27]==5){//此处判断不能进行charCodeAt()操作
-		        		read_097(this.result);
+		        		number=74;
+		        		console.log("version: Clone 0.97");
+		        		read_097(this.result);//读取事件
 		        		container.set_viedo_mine(video[0].board);//按录像布雷
-		        		start_avf(video);
+		        		if(window.orientation == 0 || window.orientation == 180){
+				        	if(video[0].level==3){//高级录像首次播放屏幕自适应
+								document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
+							}
+				        }
+		        		start_avf(video);//播放录像
+		        		video_invalid=false;
+		        	}else if(this.result[27]==6 || this.result[27]==7){
+		        		number=71;
+		        		console.log("version: Clone 2007");
+		        		read_2007(this.result);//读取事件
+		        		container.set_viedo_mine(video[0].board);//按录像布雷
+		        		if(window.orientation == 0 || window.orientation == 180){
+				        	if(video[0].level==3){//高级录像首次播放屏幕自适应
+								document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
+							}
+				        }
+		        		start_avf(video);//播放录像
+		        		video_invalid=false;
+		        	}else if(this.result[27]==8){
+		        		number=74;
+		        		console.log("version: Clone 0.97 UPK");
+		        		read_097(this.result);//读取事件
+		        		container.set_viedo_mine(video[0].board);//按录像布雷
+		        		if(window.orientation == 0 || window.orientation == 180){
+				        	if(video[0].level==3){//高级录像首次播放屏幕自适应
+								document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
+							}
+				        }
+		        		start_avf(video);//播放录像
 		        		video_invalid=false;
 		        	}
 		        }else if(this.result[0].charCodeAt()==0x00&&this.result[1].charCodeAt()==0x00){
-		        	console.log("0.97 hacked");
+		        	console.log("version: 0.97 hacked");
+		        	number=7;//丢失部分信息的mvf文件
+	        		read_097(this.result);//读取事件
+	        		container.set_viedo_mine(video[0].board);//按录像布雷
+	        		if(window.orientation == 0 || window.orientation == 180){
+			        	if(video[0].level==3){//高级录像首次播放屏幕自适应
+							document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
+						}
+			        }
+	        		start_avf(video);//播放录像
+	        		video_invalid=false;
 		        }else{
-		        	read_board(this.result,0);
+		        	console.log("暂不支持播放此录像文件，如有需要请联系QQ：1535691300");
 		        }
 
 		    }
@@ -166,15 +207,16 @@ var direction = "onorientationchange" in window ? "orientationchange" : "resize"
 // 所以如果是内嵌页建议使用resize事件
 // 检查宽高变化来检测屏幕是否旋转
 window.addEventListener(direction,resize,false);
+
 function resize() {
     document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
 }
 
-function read_097(result){//0.97clone
+function read_2007(result){//0.97clone
 	video[0]=new Array();
 	video[0].board=new Array();
 
-	number=74;
+
 	var mouth=result[number].charCodeAt();
 	var day=result[++number].charCodeAt();
 	var year=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
@@ -182,22 +224,20 @@ function read_097(result){//0.97clone
 	var min=result[++number].charCodeAt();
 	var sec=result[++number].charCodeAt();
 	var level=result[++number].charCodeAt();
+
 	container.init(level);
+
 	var mode=result[++number].charCodeAt();
-	var score_sec=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	var score_ths=result[++number].charCodeAt()*10;
-	var bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	var solved_bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	var lcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	var dcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	var rcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	if(result[++number].charCodeAt()){
+	var score_ths=(result[++number].charCodeAt())*65536+(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var score_sec=parseInt(score_ths/1000);
+	score_ths%=1000;
+	if(result[++number].charCodeAt()){//qm..什么鬼我也不知道
 		console.log("Marks: on");
 	}
 	console.log('Timestamp: '+year+'-'+mouth+'-'+day+' '+hour+':'+min+':'+sec);
-	console.log('Level: '+level+'  Mode: '+mode+'  Score:'+score_sec+'.'+three_char(score_ths));
-	console.log('3BV:'+bbbv+'  Solved3BV:'+solved_bbbv);
-	console.log('LeftClicks:'+lcl+'  RightClicks:'+rcl+'  DoubleClicks:'+dcl);
+	console.log('Level: '+level+'  Score:'+score_sec+'.'+three_char(score_ths));
+	var mode_names=new Array("","classic","density","UPK","cheat");
+	console.log("Mode: "+mode_names[mode]);
 	read_board(result,-1);
 
 	var len=result[++number].charCodeAt();//标识长度
@@ -211,6 +251,7 @@ function read_097(result){//0.97clone
 	var num1=Math.sqrt(leading);
 	var num2=Math.sqrt(leading+1000.0);
 	var num3=Math.sqrt(num1+1000.0);
+	var num4=Math.sqrt(num2+1000.0);
 	var mult=100000000;
 	var s=new Array();
 	var byte=new Array();
@@ -221,12 +262,13 @@ function read_097(result){//0.97clone
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num2))*mult))));
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3)*mult))));
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num1)+1000.0)*mult))));
-	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(Math.sqrt(num2+1000.0))*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num4)*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(num4)*mult))));
 	// log(s);
-	s[40]=0;
+	s[48]=0;
 	cur=0;
 	for(var i=0;i<=9;++i){
-		for(var j=0;j<40;++j){
+		for(var j=0;j<48;++j){
 			if(s[j]==i)
 			{
 				byte[cur]=parseInt(j/8);//此处剧毒，原c文件中byte[]为int型，js需增加parseInt操作
@@ -236,9 +278,9 @@ function read_097(result){//0.97clone
 	}
 
 	video[0].size=(result[++number].charCodeAt())*65536+(result[++number].charCodeAt())*256+result[++number].charCodeAt();
-	console.log(video[0].size);
+	// console.log(video[0].size);
 	for(var i=0;i<video[0].size;i++){
-		for(var k=0;k<5;k++){
+		for(var k=0;k<6;k++){
 			e[k]=result[++number].charCodeAt();
 		}
 		if(i>0)video[i]=new Array();
@@ -246,14 +288,16 @@ function read_097(result){//0.97clone
 		video[i].mb=apply_perm(1,byte,bit,e);
 		video[i].lb=apply_perm(2,byte,bit,e);
 		video[i].x=video[i].y=video[i].ths=video[i].sec=0;
-		for(j=0;j<9;++j)
+		for(j=0;j<11;++j)
 		{
-			video[i].x|=(apply_perm(12+j,byte,bit,e)<<j);
+			video[i].x|=(apply_perm(14+j,byte,bit,e)<<j);
 			video[i].y|=(apply_perm(3+j,byte,bit,e)<<j);
 		}
-		for(j=0;j<7;++j) video[i].ths|=(apply_perm(21+j,byte,bit,e)<<j);
-		video[i].ths*=10;
-		for(j=0;j<10;++j) video[i].sec|=(apply_perm(28+j,byte,bit,e)<<j);
+		for(j=0;j<22;++j) video[i].ths|=(apply_perm(25+j,byte,bit,e)<<j);
+		video[i].sec=parseInt(video[i].ths/1000);
+		video[i].ths%=1000;
+		video[i].x-=32;
+		video[i].y-=32;
 	}
 	// for(var i=0;i<video[0].size;i++){
 		// log(video);
@@ -274,6 +318,7 @@ function read_097(result){//0.97clone
 	video[0].hun=video[0].ths;
 	video[0].path=0;
 	video[0].realtime=score_sec+score_ths/1000;
+	video[0].level=level;
 
 	for(var i=1;i<temp[0].size;++i){
 		if(temp[i].x!=temp[i-1].x||temp[i].y!=temp[i-1].y){
@@ -355,7 +400,200 @@ function read_097(result){//0.97clone
 		}
 	}
 	video[0].size=size+1;//mvf没有sec=-1的结束标志，与avf播放兼容要size+1
-	// log(video);
+	// console.log(video);
+}
+
+function read_097(result){//0.97clone
+	video[0]=new Array();
+	video[0].board=new Array();
+
+
+	var mouth=result[number].charCodeAt();
+	var day=result[++number].charCodeAt();
+	var year=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var hour=result[++number].charCodeAt();
+	var min=result[++number].charCodeAt();
+	var sec=result[++number].charCodeAt();
+	var level=result[++number].charCodeAt();
+
+	container.init(level);
+
+	var mode=result[++number].charCodeAt();
+	var score_sec=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var score_ths=result[++number].charCodeAt()*10;
+	var bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var solved_bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var lcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var dcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var rcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	if(result[++number].charCodeAt()){
+		console.log("Marks: on");
+	}
+	console.log('Timestamp: '+year+'-'+mouth+'-'+day+' '+hour+':'+min+':'+sec);
+	console.log('Level: '+level+'  Score:'+score_sec+'.'+three_char(score_ths));
+	var mode_names=new Array("","classic","density","UPK","cheat");
+	console.log("Mode: "+mode_names[mode]);
+	console.log('3BV:'+bbbv+'  Solved3BV:'+solved_bbbv);
+	console.log('LeftClicks:'+lcl+'  RightClicks:'+rcl+'  DoubleClicks:'+dcl);
+	read_board(result,-1);
+
+	var len=result[++number].charCodeAt();//标识长度
+	video[0].player=new Array();
+	for(var i=0;i<len;i++){
+		video[0].player+=result[++number];//此处不能进行charCodeAt()操作
+	}
+	console.log('Player: '+video[0].player);
+
+	var leading=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var num1=Math.sqrt(leading);
+	var num2=Math.sqrt(leading+1000.0);
+	var num3=Math.sqrt(num1+1000.0);
+	var mult=100000000;
+	var s=new Array();
+	var byte=new Array();
+	var bit=new Array();
+	var cur=0;
+	var e=new Array();
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3+1000.0)*mult))));//格式化数字为%8d
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num2))*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3)*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num1)+1000.0)*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(Math.sqrt(num2+1000.0))*mult))));
+	// log(s);
+	s[40]=0;
+	cur=0;
+	for(var i=0;i<=9;++i){
+		for(var j=0;j<40;++j){
+			if(s[j]==i)
+			{
+				byte[cur]=parseInt(j/8);//此处剧毒，原c文件中byte[]为int型，js需增加parseInt操作
+				bit[cur++]=1<<(j%8);
+			}
+		}
+	}
+
+	video[0].size=(result[++number].charCodeAt())*65536+(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	// console.log(video[0].size);
+	for(var i=0;i<video[0].size;i++){
+		for(var k=0;k<5;k++){
+			e[k]=result[++number].charCodeAt();
+		}
+		if(i>0)video[i]=new Array();
+		video[i].rb=apply_perm(0,byte,bit,e);
+		video[i].mb=apply_perm(1,byte,bit,e);
+		video[i].lb=apply_perm(2,byte,bit,e);
+		video[i].x=video[i].y=video[i].ths=video[i].sec=0;
+		for(j=0;j<9;++j)
+		{
+			video[i].x|=(apply_perm(12+j,byte,bit,e)<<j);
+			video[i].y|=(apply_perm(3+j,byte,bit,e)<<j);
+		}
+		for(j=0;j<7;++j) video[i].ths|=(apply_perm(21+j,byte,bit,e)<<j);
+		video[i].ths*=10;
+		for(j=0;j<10;++j) video[i].sec|=(apply_perm(28+j,byte,bit,e)<<j);
+	}
+	// for(var i=0;i<video[0].size;i++){
+		// log(video);
+	// }
+	
+	//第一事件
+	if(video[0].lb)video[0].mouse=3;//lc
+	else if(video[0].rb)video[0].mouse=9;//rc
+	else if(video[0].mb)video[0].mouse=33;//mc
+	else video[0].mouse=1;//mv
+	video[0].rows=parseInt(video[0].x/16)+1;
+	video[0].columns=parseInt(video[0].y/16)+1;
+
+	var temp=video;
+	var size=0;
+	video=new Array();
+	video[0]=temp[0];
+	video[0].hun=video[0].ths;
+	video[0].path=0;
+	video[0].realtime=score_sec+score_ths/1000;
+	video[0].level=level;
+
+	for(var i=1;i<temp[0].size;++i){
+		if(temp[i].x!=temp[i-1].x||temp[i].y!=temp[i-1].y){
+			video[++size]=new Array();
+			video[size].mouse=1;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;//mvf精度为1ms，与avf播放兼容要/10,精准到1ms没啥意义。。
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].lb&&temp[i-1].lb){
+			video[++size]=new Array();
+			video[size].mouse=5;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].rb&&temp[i-1].rb){
+			video[++size]=new Array();
+			video[size].mouse=17;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].mb&&temp[i-1].mb){
+			video[++size]=new Array();
+			video[size].mouse=65;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].lb&&!temp[i-1].lb){
+			video[++size]=new Array();
+			video[size].mouse=3;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].rb&&!temp[i-1].rb){
+			video[++size]=new Array();
+			video[size].mouse=9;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].mb&&!temp[i-1].mb){
+			video[++size]=new Array();
+			video[size].mouse=33;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+	}
+	video[0].size=size+1;//mvf没有sec=-1的结束标志，与avf播放兼容要size+1
+	// console.log(video);
 }
 
 function read_board(result,add){
