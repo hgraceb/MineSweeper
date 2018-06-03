@@ -136,7 +136,7 @@ function start_avf(video)//开始函数
 	video_play=true;
 }
 
-function pause_avf(){
+function pause_avf(){//暂停
 	if(begintime!=0){
 		video_play=false;
 		window.clearInterval(int);
@@ -150,7 +150,7 @@ function pause_avf(){
 	}
 }
 
-function restart_avf(){
+function restart_avf(){//回访
 	if(video==0){
 		return false;
 	}
@@ -164,7 +164,7 @@ function restart_avf(){
 	}
 }
 
-function change_speed(){  
+function change_speed(){//改变速度
     var value = $('#range_speed').val();  
     var valStr = value + "% 100%";
     if(video_play==true)pause_avf();
@@ -178,7 +178,7 @@ function change_speed(){
     if(video_play==false)pause_avf();
 }
 
-function change_rate_value(){  
+function change_rate_value(){//改变进度条的value
     var value = $('#range_rate').val();  
     var valStr = value/10 + "% 100%";
     if(video_play==true)pause_avf();
@@ -188,7 +188,7 @@ function change_rate_value(){
     })
 }
 
-function change_rate(){  
+function change_rate(){//改变播放进度
     var value = $('#rate_value').text();
     if(last_second*1000+last_millisecond*10<value*1000){
     	last_second=parseInt(value);
@@ -235,9 +235,17 @@ function timer_avf(){
 	while(plan<size&&(second*1000+millisecond*10)>=(video[plan].sec*1000+video[plan].hun*10)){
 		document.getElementById('mouse_point').style.marginLeft=video[plan].x+'px';
 		document.getElementById('mouse_point').style.marginTop=video[plan].y+'px';
+		if(video[plan].rows>container.columns||video[plan].columns>container.rows){
+			//mvf录像x和y可能会超出界面范围
+			//若超出则只进行鼠标指针操作并退出此次循环
+			plan++;
+			console.log(111);
+			continue;
+		}
+		// console.count();
 		front=current;
 		current=container.childObject[(video[plan].columns-1)*container.columns+(video[plan].rows-1)];
-		
+
 		if(video[plan].mouse==1&&front!=current){//mv
 			if(current.isOpen==false&&rightClick==false&&leftClick==true){
 				if(current.getStyle()=="block"&&left_invalid==false){
@@ -305,7 +313,10 @@ function timer_avf(){
 				left_count++;
 			}
 			if(current.isOpen==false&&rightClick==false){
-				if(current.getStyle()=="opening"||plan==1){
+				if(current.getStyle()=="opening"||plan==1||plan==2){
+					//同样是很迷的判定
+					//avf可能第二个操作时lr（plan==1）
+					//mvf可能第三个操作是lr（plan==2）
 					current.open();
 				}
 			}else if(rightClick==true&&current.isOpen==true&&current.bombNumAround>0){
