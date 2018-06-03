@@ -3,6 +3,7 @@ $("#fileImport").click(function () {
     $("#files").click();
 })
 var video=new Array();//全部鼠标事件
+var number=0;//字符读取进度
 function fileImport() {
     //获取读取文件的File对象
     var selectedFile = document.getElementById('files').files[0];
@@ -10,7 +11,7 @@ function fileImport() {
 	    var name = selectedFile.name;//读取选中文件的文件名
 	    var size = selectedFile.size;//读取选中文件的大小
 	    console.log("文件名:"+name);
-	    console.log("大小:"+(size/1024).toFixed(2)+"kb");
+	    console.log("文件大小:"+(size/1024).toFixed(2)+"kb");
 	    if((size/1024).toFixed(2)>5120){//限制文件大小5M
 	    	console.log("录像文件过大，请重新选择");
 	    	return false;
@@ -24,7 +25,7 @@ function fileImport() {
 		        //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
 		        // console.log(this.result);
 		        var board=new Array();//雷的分布
-		        var number=5;//字符读取进度
+		        number=5;//字符读取进度，不要放在level定义下面
 		        var level=this.result[number].charCodeAt()-2;//级别
 		        var timestamp="Timestamp:";//时间戳
 		        var events=new Array();//鼠标事件
@@ -77,19 +78,20 @@ function fileImport() {
 			        	video[size].y=events[5]*256+events[7];
 			        	video[size].sec=events[6]*256+events[2]-1;
 			        	video[size].hun=events[4];
-			        	if(size>0){
+
+			        	if(size>0){//计算path
 			        		video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
 			        	}
 			        	else{
 			        		video[size].path=0;
 			        	}
-			        	if(video[size].sec<0)break;
+
+			        	if(video[size].sec<0)break;//出错处理
 			        	for(var i=0;i<8;++i){
 			        		events[i]=this.result[number++].charCodeAt();
 			        	}
 			        	size++;
 			        }//events时间读取完成
-			        // console.log(video);
 			        
 			        while(this.result[number++]!="R"){}
 			        if(this.result[number]=="e"){
@@ -119,36 +121,35 @@ function fileImport() {
 							document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).width()/640+', maximum-scale='+$(window).width()/640+'');
 						}
 			        }
+			        console.log(video);
 			        start_avf(video);
-			        video_invalid=false;
-
-
-			        // var curx=cury=-1;
-			        // for(var i=0;i<size;i++){
-			        // 	if(video[i].mouse==1&&video[i].x==curx&&video[i].y==cury)continue;
-			        // 	curx=video[i].x;
-			        // 	cury=video[i].y;
-			        // 	if(video[i]==1){console.log("mv");}
-			        // 	else if(video[i]==3){console.log("lc");}
-			        // 	else if(video[i]==5){console.log("lr");}
-			        // 	else if(video[i]==9){console.log("rc");}
-			        // 	else if(video[i]==17){console.log("rr");}
-			        // 	else if(video[i]==33){console.log("mc");}
-			        // 	else if(video[i]==65){console.log("mr");}
-			        // 	console.log((video[i].x/16+1)+"  "+(video[i].y/16+1)+"  "+video[i].x+video[i].y);
-			        // }
-			    
-
-
-			     //    for(var i=0;i<container.rows;i++){
-				    // 	var board_play=new Array();
-				    //     for(var j=0;j<container.columns;j++){
-				    //     	board_play.push(board[i*container.rows+j]);
-				    //     }
-				    //     console.log(board_play);
-				    // }       
-			        
+			        video_invalid=false;		        
 			    }
+		    }
+		}else if(name[name_length-3]=='.'&&name[name_length-2]=='m'&&name[name_length-1]=='v'&&name[name_length]=='f'){
+			var reader = new FileReader();//这是核心,读取操作就是由它完成.
+		    reader.readAsBinaryString(selectedFile);//读取文件的内容,也可以读取文件的URL
+		    reader.onload = function () {
+		    	reset();
+		        //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
+		        // console.log(this.result);
+		        number=0;//字符读取进度
+		        video=new Array();
+
+		        if(this.result[0].charCodeAt()==0x11&&this.result[1].charCodeAt()==0x4D){
+		        	console.log("version: Clone 0.97");
+		        	if(this.result[27]==5){//此处判断不能进行charCodeAt()操作
+		        		read_097(this.result);
+		        		container.set_viedo_mine(video[0].board);//按录像布雷
+		        		start_avf(video);
+		        		video_invalid=false;
+		        	}
+		        }else if(this.result[0].charCodeAt()==0x00&&this.result[1].charCodeAt()==0x00){
+		        	console.log("0.97 hacked");
+		        }else{
+		        	read_board(this.result,0);
+		        }
+
 		    }
 		}else{
 			console.log("录像格式错误，请重新选择");
@@ -167,4 +168,226 @@ var direction = "onorientationchange" in window ? "orientationchange" : "resize"
 window.addEventListener(direction,resize,false);
 function resize() {
     document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
+}
+
+function read_097(result){//0.97clone
+	video[0]=new Array();
+	video[0].board=new Array();
+
+	number=74;
+	var mouth=result[number].charCodeAt();
+	var day=result[++number].charCodeAt();
+	var year=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var hour=result[++number].charCodeAt();
+	var min=result[++number].charCodeAt();
+	var sec=result[++number].charCodeAt();
+	var level=result[++number].charCodeAt();
+	container.init(level);
+	var mode=result[++number].charCodeAt();
+	var score_sec=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var score_ths=result[++number].charCodeAt()*10;
+	var bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var solved_bbbv=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var lcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var dcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var rcl=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	if(result[++number].charCodeAt()){
+		console.log("Marks: on");
+	}
+	console.log('Timestamp: '+year+'-'+mouth+'-'+day+' '+hour+':'+min+':'+sec);
+	console.log('Level: '+level+'  Mode: '+mode+'  Score:'+score_sec+'.'+three_char(score_ths));
+	console.log('3BV:'+bbbv+'  Solved3BV:'+solved_bbbv);
+	console.log('LeftClicks:'+lcl+'  RightClicks:'+rcl+'  DoubleClicks:'+dcl);
+	read_board(result,-1);
+
+	var len=result[++number].charCodeAt();//标识长度
+	video[0].player=new Array();
+	for(var i=0;i<len;i++){
+		video[0].player+=result[++number];//此处不能进行charCodeAt()操作
+	}
+	console.log('Player: '+video[0].player);
+
+	var leading=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	var num1=Math.sqrt(leading);
+	var num2=Math.sqrt(leading+1000.0);
+	var num3=Math.sqrt(num1+1000.0);
+	var mult=100000000;
+	var s=new Array();
+	var byte=new Array();
+	var bit=new Array();
+	var cur=0;
+	var e=new Array();
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3+1000.0)*mult))));//格式化数字为%8d
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num2))*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3)*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num1)+1000.0)*mult))));
+	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(Math.sqrt(num2+1000.0))*mult))));
+	// log(s);
+	s[40]=0;
+	cur=0;
+	for(var i=0;i<=9;++i){
+		for(var j=0;j<40;++j){
+			if(s[j]==i)
+			{
+				byte[cur]=parseInt(j/8);//此处剧毒，原c文件中byte[]为int型，js需增加parseInt操作
+				bit[cur++]=1<<(j%8);
+			}
+		}
+	}
+
+	video[0].size=(result[++number].charCodeAt())*65536+(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	console.log(video[0].size);
+	for(var i=0;i<video[0].size;i++){
+		for(var k=0;k<5;k++){
+			e[k]=result[++number].charCodeAt();
+		}
+		if(i>0)video[i]=new Array();
+		video[i].rb=apply_perm(0,byte,bit,e);
+		video[i].mb=apply_perm(1,byte,bit,e);
+		video[i].lb=apply_perm(2,byte,bit,e);
+		video[i].x=video[i].y=video[i].ths=video[i].sec=0;
+		for(j=0;j<9;++j)
+		{
+			video[i].x|=(apply_perm(12+j,byte,bit,e)<<j);
+			video[i].y|=(apply_perm(3+j,byte,bit,e)<<j);
+		}
+		for(j=0;j<7;++j) video[i].ths|=(apply_perm(21+j,byte,bit,e)<<j);
+		video[i].ths*=10;
+		for(j=0;j<10;++j) video[i].sec|=(apply_perm(28+j,byte,bit,e)<<j);
+	}
+	// for(var i=0;i<video[0].size;i++){
+		// log(video);
+	// }
+	
+	//第一事件
+	if(video[0].lb)video[0].mouse=3;//lc
+	else if(video[0].rb)video[0].mouse=9;//rc
+	else if(video[0].mb)video[0].mouse=33;//mc
+	else video[0].mouse=1;//mv
+	video[0].rows=parseInt(video[0].x/16)+1;
+	video[0].columns=parseInt(video[0].y/16)+1;
+
+	var temp=video;
+	var size=0;
+	video=new Array();
+	video[0]=temp[0];
+	video[0].hun=video[0].ths;
+	video[0].path=0;
+	video[0].realtime=score_sec+score_ths/1000;
+
+	for(var i=1;i<temp[0].size;++i){
+		if(temp[i].x!=temp[i-1].x||temp[i].y!=temp[i-1].y){
+			video[++size]=new Array();
+			video[size].mouse=1;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;//mvf精度为1ms，与avf播放兼容要/10,精准到1ms没啥意义。。
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].lb&&temp[i-1].lb){
+			video[++size]=new Array();
+			video[size].mouse=5;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].rb&&temp[i-1].rb){
+			video[++size]=new Array();
+			video[size].mouse=17;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(!temp[i].mb&&temp[i-1].mb){
+			video[++size]=new Array();
+			video[size].mouse=65;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].lb&&!temp[i-1].lb){
+			video[++size]=new Array();
+			video[size].mouse=3;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].rb&&!temp[i-1].rb){
+			video[++size]=new Array();
+			video[size].mouse=9;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+		if(temp[i].mb&&!temp[i-1].mb){
+			video[++size]=new Array();
+			video[size].mouse=33;
+			video[size].sec=temp[i].sec;
+			video[size].hun=temp[i].ths/10;
+			video[size].x=temp[i].x;
+			video[size].y=temp[i].y;
+			video[size].rows=parseInt(temp[i].x/16)+1;
+			video[size].columns=parseInt(temp[i].y/16)+1;
+			video[size].path=video[size-1].path+Math.pow((Math.pow(video[size].x-video[size-1].x,2)+Math.pow(video[size].y-video[size-1].y,2)),0.5);
+		}
+	}
+	video[0].size=size+1;//mvf没有sec=-1的结束标志，与avf播放兼容要size+1
+	// log(video);
+}
+
+function read_board(result,add){
+	var w=0;//宽
+	var h=0;//高
+	var m=0;//雷数
+	var pos=0;//雷的位置
+	w=result[++number].charCodeAt();
+	h=result[++number].charCodeAt();
+	for(var i=0;i<w*h;i++){
+		video[0].board[i]=0;
+	}
+	var m=(result[++number].charCodeAt())*256+result[++number].charCodeAt();
+	console.log('Width: '+w+'  Height: '+h+'  Mines: '+m);
+	for(var i=0;i<m;i++){
+		pos=result[++number].charCodeAt()+add+(result[++number].charCodeAt()+add)*w;
+		if(pos>=w*h||pos<0){
+			console.log("录像读取错误");
+			return false;
+		}
+		video[0].board[pos]=1;
+	}
+	// log(video[0].board);
+}
+
+function apply_perm(num,byte,bit,event){
+	return (event[byte[num]]&bit[num])?1:0;
+}
+
+function sprintf(num) {//格式化数字为%8d,返回值为字符串型（影响不大？）
+	for(var i=0;i<8-num.toString().length;i++){
+		num='0'+num;
+	}
+	return num;
 }
