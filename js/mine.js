@@ -12,7 +12,7 @@ var ces_count=0;//有效点击次数
 var right_invalid=false;//消除双击带右键
 var left_invalid=false;//消除双击带左键
 var right_minus=true;//保证left_count只能减一次
-var video_invalid=true;//判断是否读取过录像文件并记录数据
+var video_invalid=true;//判断是否读取过录像文件并已经记录数据
 var reset_begin=false;//判断重开开始计时的时间
 var path=0;//移动距离
 
@@ -46,7 +46,6 @@ Container.prototype.init=function(level){
 		if(document.getElementById("mouse_point")){
 			$("div#mouse_point").remove();
 		}
-		document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
 		document.getElementById("video_control").style.display="none";
 		var parent=document.getElementById("container");
 		var grandparent=document.getElementById("containers");
