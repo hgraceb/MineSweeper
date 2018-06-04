@@ -1,9 +1,12 @@
+"use strict";
+
 //点击导入按钮,使files触发点击事件,然后完成读取文件的操作
 $("#fileImport").click(function () {
     $("#files").click();
 })
 var video=new Array();//全部鼠标事件
 var number=0;//字符读取进度
+// var file=new Array();
 function fileImport() {
     //获取读取文件的File对象
     var selectedFile = document.getElementById('files').files[0];
@@ -20,12 +23,6 @@ function fileImport() {
 		if(name[name_length-3]=='.'&&name[name_length-2]=='a'&&name[name_length-1]=='v'&&name[name_length]=='f'){
 			var reader = new FileReader();//这是核心,读取操作就是由它完成.
 		    reader.readAsBinaryString(selectedFile);//读取文件的内容,也可以读取文件的URL
-		    reader.onloadstart = function () {  
-                console.log("开始读取....");  
-            }  
-            reader.onprogress = function () {  
-                console.log("正在读取中....");  
-            }  
             reader.onabort = function () {  
                 console.log("中断读取....");  
             }  
@@ -33,7 +30,6 @@ function fileImport() {
                 console.log("读取异常....");  
             }  
 		    reader.onload = function () {
-		    	console.log("解析录像....");
 		    	reset();
 		        //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
 		        // console.log(this.result);
@@ -142,12 +138,6 @@ function fileImport() {
 		}else if(name[name_length-3]=='.'&&name[name_length-2]=='m'&&name[name_length-1]=='v'&&name[name_length]=='f'){
 			var reader = new FileReader();//这是核心,读取操作就是由它完成.
 		    reader.readAsBinaryString(selectedFile);//读取文件的内容,也可以读取文件的URL
-		    reader.onloadstart = function () {  
-                console.log("开始读取....");  
-            }  
-            reader.onprogress = function () {  
-                console.log("正在读取....");  
-            }  
             reader.onabort = function () {  
                 console.log("中断读取....");  
             }  
@@ -155,7 +145,6 @@ function fileImport() {
                 console.log("读取异常....");  
             }  
 		    reader.onload = function () {
-		    	console.log("解析录像....");
 		    	reset();
 		        //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
 		        // console.log(this.result);
@@ -543,7 +532,7 @@ function read_2007(result){//0.97clone
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num4)*mult))));
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(num4)*mult))));
 	// log(s);
-	s[48]=0;
+	if(s[48])s[48]=0;//这句好像有点多余？？还是另有用处
 	cur=0;
 	for(var i=0;i<=9;++i){
 		for(var j=0;j<48;++j){
@@ -735,7 +724,7 @@ function read_097(result){//0.97clone
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(num3)*mult))));
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.sin(Math.sqrt(num1)+1000.0)*mult))));
 	s+=sprintf(parseInt(Math.round(Math.abs(Math.cos(Math.sqrt(num2+1000.0))*mult))));
-	s[40]=0;
+	if(s[40])s[40]=0;
 	cur=0;
 	// console.log(s);
 	for(var i=0;i<=9;++i){
