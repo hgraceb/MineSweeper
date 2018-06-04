@@ -229,7 +229,7 @@ function timer_avf(){
 	if((second*1000+millisecond*10)>video[0].realtime*1000){//高倍速时间有延迟，自欺欺人解决法
 		second=video[size-1].sec;
 		millisecond=video[size-1].hun;
-		console.log(second+'.'+millisecond);
+		console.log('录像实际时间:'+second+'.'+millisecond);
 	}
 
 	while(plan<size&&(second*1000+millisecond*10)>=(video[plan].sec*1000+video[plan].hun*10)){
@@ -383,7 +383,7 @@ function stop()//暂停函数
 	{
 		stop_minutes+=60;
 	}
-	console.log(((stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds())+(stop_milliseconds-begintime.getMilliseconds())/1000).toFixed(2));
+	console.log('运行时间:'+((stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds())+(stop_milliseconds-begintime.getMilliseconds())/1000).toFixed(2));
 	// second=(stop_minutes-begintime.getMinutes())*60+(stop_seconds-begintime.getSeconds());
 	// millisecond=parseInt((stop_milliseconds-begintime.getMilliseconds())/10);
 }
