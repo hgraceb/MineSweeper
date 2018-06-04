@@ -1,3 +1,5 @@
+"use strict";
+
 //时间
 //初始化变量
 var second=0;//秒
@@ -178,6 +180,18 @@ function change_speed(){//改变速度
     if(video_play==false)pause_avf();
 }
 
+function reset_speed(){//复位速度为1
+	var valStr = 50 + "% 100%";
+    if(video_play==true)pause_avf();
+    speed=1;
+    $('#speed_value').html('1.00x');
+    $('#range_speed').val(50);
+    $('#range_speed').css({  
+      "background-size": valStr 
+    })
+    if(video_play==false)pause_avf();
+}
+
 function change_rate_value(){//改变进度条的value
     var value = $('#range_rate').val();  
     var valStr = value/10 + "% 100%";
@@ -239,7 +253,7 @@ function timer_avf(){
 			//mvf录像x和y可能会超出界面范围
 			//若超出则只进行鼠标指针操作并退出此次循环
 			plan++;
-			console.log(111);
+			// console.log(111);
 			continue;
 		}
 		// console.count();
