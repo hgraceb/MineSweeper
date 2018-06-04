@@ -162,7 +162,7 @@
 			<div id="speed_control" >
 			    <input type="range" id="range_speed" value="50" oninput="change_speed()" min="1" max="100" step="1" ontouchmove="event.stopPropagation();"/>  
 		    </div>
-		    <span id="speed_value">1.00x</span>
+		    <span id="speed_value" onclick="reset_speed()" >1.00x</span>
 
 		    <div id="rate_control" >
 			    <input type="range" id="range_rate" value="0" oninput="change_rate_value()" min="0" max="1000" step="1" ontouchmove="event.stopPropagation();" onmouseup="change_rate()" ontouchend="change_rate()" />  
@@ -173,6 +173,7 @@
 
 		</div>
 	</div>
+
 
 		<div class="preload_image">
 		<img src="image/1.bmp">
@@ -213,7 +214,8 @@
 			
 	</body>
 
-	<script>
+	<script type="text/javascript">
+
     </script>
 
 </html>
