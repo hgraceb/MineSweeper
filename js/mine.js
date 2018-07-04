@@ -43,7 +43,7 @@ Container.prototype.init=function(level){
 	right_minus=true;
 	path=0;
 	var exist=document.getElementById("container");
-	if(level==3&&(window.orientation==0||window.orientation==180)){//手机exp屏幕自适应
+	if((level==3||this.level==3)&&(window.orientation==0||window.orientation==180)){//手机exp屏幕自适应
 		document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+window.screen.width/640+', maximum-scale='+window.screen.width/640+'');
 	}else{
 		document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
