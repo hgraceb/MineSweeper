@@ -235,9 +235,8 @@ function read_board(result,add){
 // orientation获取不到的情况
 // 所以如果是内嵌页建议使用resize事件
 // 检查宽高变化来检测屏幕是否旋转
-var direction = "orientationchange";
 // 暂不使用resize,避免调整窗口大小时重复background_reload()
-window.addEventListener(direction,function() {
+window.addEventListener("orientationchange",function() {
     console.log('屏幕：'+window.orientation+'度');
     background_reload();
     if(window.orientation == 90 || window.orientation == -90){
