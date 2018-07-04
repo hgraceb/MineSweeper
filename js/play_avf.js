@@ -229,14 +229,15 @@ function read_board(result,add){
 	// log(video[0].board);
 }
 
-var direction = "onorientationchange" in window ? "orientationchange" : "resize";
+// var direction = "onorientationchange" in window ? "orientationchange" : "resize";
 // 代码中监测旋转是用了onorientationchange 函数
 // 但是在一些APP或游戏内嵌页面会有该函数不会执行
 // orientation获取不到的情况
 // 所以如果是内嵌页建议使用resize事件
 // 检查宽高变化来检测屏幕是否旋转
-// 暂不使用resize
-window.addEventListener(onorientationchange, function() {
+var direction = "orientationchange";
+// 暂不使用resize,避免调整窗口大小时重复background_reload()
+window.addEventListener(direction,function() {
     console.log('屏幕：'+window.orientation+'度');
     background_reload();
     if(window.orientation == 90 || window.orientation == -90){
