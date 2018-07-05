@@ -243,7 +243,7 @@ window.addEventListener("orientationchange",function() {
     	document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0');
     }
     else if(container.level==3){
-    	document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+$(window).height()/640+', maximum-scale='+$(window).height()/640+'');
+    	document.getElementsByTagName("meta")[1]["content"]=('width=device-width, initial-scale=1, user-scalable=no, minimum-scale='+window.screen.width/640+', maximum-scale='+window.screen.width/640+'');
     }
 },false);
 
